@@ -15,11 +15,15 @@ $app->get('/', function () use ($app) {
     return $app->version();
 });
 
-$app->get('/hello', function () use ($app) {
+$app->put('/hello', function () use ($app) {
     return 'Hello World';
 });
+
+$app->get('/user/{id}', 'UserController@show');
 
 $app->get('/posts/{post}/comments/{comment}', function ($postId, $commentId) {
     echo '$postId:' . $postId .'<br>';
     echo '$commentId:' . urldecode($commentId) .'<br>';
 });
+
+

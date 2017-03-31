@@ -1747,6 +1747,11 @@ class Request
             $this->server->remove('IIS_WasUrlRewritten');
         } elseif ($this->server->has('REQUEST_URI')) {
             $requestUri = $this->server->get('REQUEST_URI');
+
+            /********* 这里可以处理 REQUEST_URI *********/
+//            $apiVersion = 'v1';
+//            if(strpos($requestUri, $apiVersion)) $requestUri = substr($requestUri, strlen($apiVersion) + 1);
+
             // HTTP proxy reqs setup request URI with scheme and host [and port] + the URL path, only use URL path
             $schemeAndHttpHost = $this->getSchemeAndHttpHost();
             if (strpos($requestUri, $schemeAndHttpHost) === 0) {
