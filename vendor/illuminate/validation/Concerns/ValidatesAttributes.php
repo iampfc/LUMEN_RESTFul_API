@@ -519,6 +519,28 @@ trait ValidatesAttributes
     }
 
     /**
+     * 自定义的手机号码验证
+     * @param $attribute
+     * @param $value
+     * @return int
+     */
+    public static function validateMobile($attribute, $value)
+    {
+        return preg_match("/^1[3-5,8]{1}[0-9]{9}$/", $value);
+    }
+
+    /**
+     * 自定义的密码验证
+     * @param $attribute
+     * @param $value
+     * @return int
+     */
+    public static function validatePassword($attribute, $value)
+    {
+        return preg_match("/^|(.){6,}|$/", $value);
+    }
+
+    /**
      * Validate the existence of an attribute value in a database table.
      *
      * @param  string  $attribute

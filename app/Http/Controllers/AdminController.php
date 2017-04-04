@@ -2,64 +2,12 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\User;
 use App\Models\Admin;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
-class UserController extends Controller
+class AdminController extends Controller
 {
-    /**
-     * 客户端用户注册
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function register(Request $request)
-    {
-        $data = $request->all();
-        //todo 电话格式验证,密码格式验证等
-        $validator = $this->validate($request, [
-            'account' => 'required|max:32',
-            'password' => 'required|min:6',
-            'company' => 'required',
-            'mobile' => 'required|mobile',
-        ]);
-        if($validator) return response()->json($this->error('vaildFail',$validator));
-
-        //todo 用户名验证
-        $result = \App\Models\User::getByAccount($data['account']);
-        if(!$result) return response()->json($this->error('createExist'));
-
-        //todo 判断此公司名下是否已经有注册过的手机号
-        $result = \App\Models\User::getByCompany($data['company']);
-        if($result)
-        {
-            foreach ($result as $key => $value)
-            {
-                if($value->mobile == $data['mobile'])
-                {
-                    return response()->json($this->error('mobileExist'));
-                }
-            }
-        }
-
-        //todo 如果有关联专属运维则进行关联逻辑
-        if($data['admin_id'])
-        {
-            $admin = \App\Models\Admin::getByIDOrAccount($data['admin_id']);
-            if (!$admin)
-            {
-                return response()->json($this->error('notFoundAdmin'));
-            }
-            $data['admin_id'] = $admin->id;
-        }
-        $lastInsertID =  \App\Models\User::create($data);
-        $user = \App\Models\User::getByID($lastInsertID);
-        if(!$user) return response()->json($this->error('registerFail'));
-        return response()->json($this->success($user,'注册成功'));
-
-    }
-
     public function getByID($id)
     {
         $result = \App\Models\User::getByID($id);
@@ -75,7 +23,6 @@ class UserController extends Controller
         print_r($users);echo '<br>';
 
     }
-
 
     public function show($id)
     {

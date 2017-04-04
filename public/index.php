@@ -12,6 +12,7 @@
 */
 
 $app = require __DIR__.'/../bootstrap/app.php';
+require __DIR__.'/../bootstrap/dbtable.php';
 
 /*
 |--------------------------------------------------------------------------

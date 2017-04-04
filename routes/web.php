@@ -15,13 +15,16 @@ $app->get('/', function () use ($app) {
     return $app->version();
 });
 
-$app->put('/hello', function () use ($app) {
-    return 'Hello World';
-});
 
-$app->get('/user/{id}', 'UserController@show');
+$app->get('/user/getByID/{id}', 'UserController@getByID');
+$app->get('/user/getList', 'UserController@getList');
+$app->post('/user/register', 'UserController@register');
 
-$app->get('/posts/{post}/comments/{comment}', function ($postId, $commentId) {
+
+
+
+
+$app->post('/posts/{post}/comments/{comment}', function ($postId, $commentId) {
     echo '$postId:' . $postId .'<br>';
     echo '$commentId:' . urldecode($commentId) .'<br>';
 });

@@ -61,7 +61,8 @@ trait ProvidesConvenienceMethods
         $validator = $this->getValidationFactory()->make($request->all(), $rules, $messages, $customAttributes);
 
         if ($validator->fails()) {
-            $this->throwValidationException($request, $validator);
+            return $validator->errors()->getMessages();
+//            $this->throwValidationException($request, $validator);
         }
     }
 
