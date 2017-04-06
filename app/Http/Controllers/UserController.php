@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\User;
 use App\Models\Admin;
+use App\Models\Helper;
+use App\Models\Token;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -16,15 +18,25 @@ class UserController extends Controller
      */
     public function register(Request $request)
     {
+        //todo 获取输入值
         $data = $request->all();
+        $data['name']    = $request->input('name', '');
+        $data['address'] = $request->input('address', '');
+        $data['email']   = $request->input('email', '');
+        $data['avatar']  = $request->input('avatar', '');
+        $data['gender']  = $request->input('gender', 'u');
+        $data['join']    = $request->input('join', \App\Models\Helper::now());
+        $data['last']    = $request->input('last', \App\Models\Helper::now());
+
         //todo 电话格式验证,密码格式验证等
         $validator = $this->validate($request, [
-            'account' => 'required|max:32',
-            'password' => 'required|min:6',
-            'company' => 'required',
-            'mobile' => 'required|mobile',
+            'account'   => 'required|max:32',
+            'password'  => 'required|password',
+            'company'   => 'required',
+            'mobile'    => 'required|mobile',
         ]);
         if($validator) return response()->json($this->error('vaildFail',$validator));
+        $data['password'] = \App\Models\Helper::signPassword($data['account'],$data['password']);
 
         //todo 用户名验证
         $result = \App\Models\User::getByAccount($data['account']);
@@ -44,7 +56,7 @@ class UserController extends Controller
         }
 
         //todo 如果有关联专属运维则进行关联逻辑
-        if($data['admin_id'])
+        if(isset($data['admin_id']))
         {
             $admin = \App\Models\Admin::getByIDOrAccount($data['admin_id']);
             if (!$admin)
@@ -56,7 +68,57 @@ class UserController extends Controller
         $lastInsertID =  \App\Models\User::create($data);
         $user = \App\Models\User::getByID($lastInsertID);
         if(!$user) return response()->json($this->error('registerFail'));
+        $token = \App\Models\Token::awardToken($user->id);
+        if($token === false){
+            return $this->error('awardTokenFail');
+        }
+
         return response()->json($this->success($user,'注册成功'));
+    }
+
+    /**
+     * 客户端用户登录
+     * @param Request $request
+     * @return array|\Illuminate\Http\JsonResponse
+     */
+    public function login(Request $request)
+    {
+        $account  = $request->input('account', '');
+        $password = $request->input('password', '');
+        $company  = $request->input('company', '');
+
+        $validator = $this->validate($request, [
+            'account'   => 'required',
+            'password'  => 'required',
+            'company'   => 'required',
+        ]);
+        if($validator) return response()->json($this->error('vaildFail',$validator));
+
+        //TODO 支持用户名手机号码登录
+        $user = \App\Models\User::getFrontLogin($account,$company);
+        if(!$user) return $this->error('notFoundUser');
+        $signPassword = \App\Models\Helper::signPassword($user->account,$password);
+        if($user->password == $signPassword){
+            if($user->locked != '0000-00-00 00:00:00'){
+                return $this->error('disable');
+            }
+            $token = \App\Models\Token::awardToken($user->id);
+            if($token === false){
+                return $this->error('awardTokenFail');
+            }else{
+                unset($user->password);
+                \DB::table(TABLE_USER)->where('id', $user->id)->update(['last' => \App\Models\Helper::now()]);
+                return $this->success(
+                    array(
+                        'token' => $token,
+                        'user'  => $user,
+                    ),
+                    '登录成功'
+                );
+            }
+        }else{
+            return $this->error('loginFail');
+        }
 
     }
 
@@ -69,10 +131,10 @@ class UserController extends Controller
 
     public function getList()
     {
-        $pageID = 2;
+        $pageID = 1;
         $pageSize = 10;
         $users = \DB::table(TABLE_USER)->skip(($pageID-1)* $pageSize)->take($pageSize)->get();
-        print_r($users);echo '<br>';
+        return response()->json($this->success($users));
 
     }
 

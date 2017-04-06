@@ -66,6 +66,14 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
         return $result;
     }
 
+    static public function getFrontLogin($account,$company)
+    {
+        $table = TABLE_USER;
+        $user = \DB::select("SELECT * FROM $table wHeRe company = '$company' AND (account = '$account' OR mobile = '$account')");
+        if(!$user) return false;
+        return $user[0];
+    }
+
     /**
      * 创建用户
      * @param $input
@@ -75,16 +83,22 @@ class User extends Model implements AuthenticatableContract, AuthorizableContrac
     {
         $lastInsertID = \DB::table(TABLE_USER)->insertGetId(
             [
-                'account' => $data['account'],
-                "password" => $data['password'],
-                'name' => $data['name'],
-                'company' => $data['company'],
-                'mobile' => $data['mobile']
+                'account'   => $data['account'],
+                "password"  => $data['password'],
+                'company'   => $data['company'],
+                'mobile'    => $data['mobile'],
+                'name'      => $data['name'],
+                'address'   => $data['address'],
+                'email'     => $data['email'],
+                'avatar'    => $data['avatar'],
+                'gender'    => $data['gender'],
+                'last'      => $data['last'],
+                'join'      => $data['join']
             ]
         );
 
         //如果有设置对应的运维人员则关联起来
-        if ($data['admin_id'])
+        if (isset($data['admin_id']))
         {
             $result = \DB::table(TABLE_USER_ADMIN_RELATION)->insert(
                 [

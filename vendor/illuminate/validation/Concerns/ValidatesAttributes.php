@@ -537,7 +537,7 @@ trait ValidatesAttributes
      */
     public static function validatePassword($attribute, $value)
     {
-        return preg_match("/^|(.){6,}|$/", $value);
+        return preg_match("/^[\w-\.]{6,16}$/", $value);
     }
 
     /**
