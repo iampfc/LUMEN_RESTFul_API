@@ -6,6 +6,7 @@ use App\Models\User;
 use App\Models\Admin;
 use App\Models\Helper;
 use App\Models\Token;
+use App\Models\Ag;
 use Illuminate\Http\Request;
 use Illuminate\Validation\ValidationException;
 
@@ -119,7 +120,12 @@ class UserController extends Controller
         }else{
             return $this->error('loginFail');
         }
+    }
 
+    public function test()
+    {
+        $result = \App\Models\Ag::sendSms('18965652853','register','验证您的手机号码,您的验证码是{code}');
+        var_dump($result);
     }
 
     public function getByID($id)

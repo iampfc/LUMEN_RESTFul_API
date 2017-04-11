@@ -20,6 +20,7 @@ $app->get('/user/getByID/{id}', 'UserController@getByID');
 $app->get('/user/getList', 'UserController@getList');
 $app->post('/user/register', 'UserController@register');
 $app->post('/user/login', 'UserController@login');
+$app->post('/user/test', 'UserController@test');
 
 
 
